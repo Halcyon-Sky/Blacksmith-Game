@@ -1,0 +1,65 @@
+public class processedMaterial
+{
+    private int amount;
+    private int type;
+    
+    public processedMaterial(int amount, int type)
+    {
+        this.amount = amount;
+        this.type = type;
+    }
+    
+    void display() //for debug purposes
+    {
+        System.out.print(amount + " ");
+        System.out.println(type);
+    }
+    
+    void setNumber(int num)
+    {
+        amount = num;
+    }
+    
+    int getAmount()
+    {
+        return amount;
+    }
+    
+    String getName()
+    {
+        switch (type)
+        {
+            case 1: return "Copper Ingot";
+            case 2: return "Tin Ingot";
+            case 3: return "Bronze Ingot";
+            case 4: return "Iron Ingot";
+            case 5: return "Steel Ingot";
+            case 6: return "Silver Ingot";
+            case 7: return "Gold Ingot";
+            case 8: return "Mythril Ingot";
+            case 9: return "Electrum Ingot";
+            case 10: return "Tarnished Ingot";
+            case 11: return "Gleamsteel Ingot";
+            case 12: return "Platinum Ingot";
+            case 13: return "Tungsten Ingot";
+            case 14: return "Duralite Ingot";
+            case 15: return "Adamantine Ingot";
+            case 16: return "Wooden Hilt";
+            case 17: return "Sturdy Hilt";
+            case 18: return "Ironwood Hilt";
+            case 19: return "Enchanted Hilt";
+            case 20: return "Hellfire Hilt";
+            case 21: return "Wooden Greathilt";
+            case 22: return "Sturdy Greathilt";
+            case 23: return "Ironwood Greathilt";
+            case 24: return "Enchanted Greathilt";
+            case 25: return "Hellfire Greathilt";
+            case 26: return "Wooden Haft";
+            case 27: return "Sturdy Haft";
+            case 28: return "Ironwood Haft";
+            case 29: return "Enchanted Haft";
+            case 30: return "Hellfire Haft";
+            default: return "material not found!";
+        }
+    }
+}

@@ -1,0 +1,88 @@
+public class product
+{
+    private int amount;
+    private int type;
+    
+    public product(int amount, int type)
+    {
+        this.amount = amount;
+        this.type = type;
+    }
+    
+    void display() //for debug purposes
+    {
+        System.out.print(amount + " ");
+        System.out.println(type);
+    }
+    
+    void setNumber(int num)
+    {
+        amount = num;
+    }
+    
+    int getAmount()
+    {
+        return amount;
+    }
+    
+    int getPrice()
+    {
+        switch (type)
+        {
+            case 1: return 10;
+            case 2: return 10;
+            case 3: return 25;
+            case 4: return 25;
+            case 5: return 50;
+            case 6: return 75;
+            case 7: return 90;
+            case 8: return 125;
+            case 9: return 175;
+            case 10: return 250;
+            case 11: return 15;
+            case 12: return 40;
+            case 13: return 65;
+            case 14: return 100;
+            case 15: return 150;
+            default: return 1;
+        }
+    }
+    
+    String getName()
+    {
+        String result = "";
+        switch (type - 1 / 8)
+        {
+            case 0: result += "Copper "; break;
+            case 1: result += "Tin "; break;
+            case 2: result += "Bronze "; break;
+            case 3: result += "Iron "; break;
+            case 4: result += "Steel "; break;
+            case 5: result += "Silver "; break;
+            case 6: result += "Golden "; break;
+            case 7: result += "Mythril "; break;
+            case 8: result += "Electrum "; break;
+            case 9: result += "Tarnished "; break;
+            case 10: result += "Gleamsteel "; break;
+            case 11: result += "Platinum "; break;
+            case 12: result += "Tungsten "; break;
+            case 13: result += "Duralite "; break;
+            case 14: result += "Adamantine "; break;
+            default: return "item not found!";
+        }
+        
+        switch (type % 8)
+        {
+            case 0: result += "Shield"; break;
+            case 1: result += "Dagger"; break;
+            case 2: result += "Shortsword"; break;
+            case 3: result += "Longsword"; break;
+            case 4: result += "Greatsword"; break;
+            case 5: result += "Axe"; break;
+            case 6: result += "Spear"; break;
+            case 7: result += "Halberd"; break;
+            default: return "item not found!";
+        }
+        return result;
+    }
+}

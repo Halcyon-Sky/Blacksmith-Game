@@ -1,0 +1,191 @@
+import java.io.*;
+import java.util.*;
+/**
+ * The main game environment for the Blacksmith Game.
+ *
+ * @author Jack Corbett
+ * @version 11/27/2024
+ */
+public class Game
+{
+    final static int textSpeed = 1500; //millisecond delay btwn messages
+    static Scanner in = new Scanner(System.in); //i do Not want to remake this for whatever nonsense i end up needing to
+    public static void main(String[] args)
+    {
+        //inventory setup
+        int gold = 50;
+        ArrayList<rawMaterial> inv1 = new ArrayList<rawMaterial>();
+        ArrayList<processedMaterial> inv2 = new ArrayList<processedMaterial>();
+        ArrayList<product> inv3 = new ArrayList<product>();
+        ArrayList<equipment> inv4 = new ArrayList<equipment>();
+        for(int i = 0; i < 15; i++)
+        {
+            inv1.add(i, new rawMaterial(0, i+1)); 
+        }
+        for(int i = 0; i < 30; i++)
+        {
+            inv2.add(i, new processedMaterial(0, i+1));
+        }
+        for(int i = 0; i < 120; i++)
+        {
+            inv3.add(i, new product(0, i+1));
+        }
+        for(int i = 0; i < 2; i++) //TODO update to match eventual number of equipment items
+        {
+            inv4.add(i, new equipment(0, i+1));
+        }
+        inv1.get(0).setNumber(5);
+        int response = ask("Welcome to the Blacksmith Game! Would you like a tutorial?");
+        int location = -1; //-1 for the tutorial, 0 for the storefront, 1 for the workshop, 2 for the market, 3 for the mines
+        if(response == 1)
+            say("Amazing! I just knew you would.");
+        else if(response == 2)
+            say("Huh? What do you mean? Of course you want a tutorial - everyone loves tutorials!");
+        else
+        {
+            say("Well, clearly this is a good starting point, as you evidently don't know how to answer simple questions. \nIn this game, when you see a prompt like that one, you must answer ONLY with one of the options. \nAdditionally, you may not type when you have not just immediately received one of those prompts. Otherwise, we will make fun of you.");
+            do
+            {
+                response = ask("Let's try it out. Do you understand the directions?");
+                if(response == 1)
+                    say("Good, at least you're learning. On to business.");
+                else if(response == 2)
+                    say("Oh, for God's sake. You understand. Stop being obstinant.");
+                else
+                    say("Let me try again then. Maybe this time I'll get through to you. \nIn this game, when you see a prompt like that one, you must answer ONLY with one of the options. \nAdditionally, you may not type when you have not just immediately received one of those prompts. Otherwise, we will make fun of you.");
+            } while (response != 0);
+        }
+        say("Here we go, then. This is a game about blacksmithing! In this game, you will take control of an up-and-coming blacksmith \nhailing from the beautiful country of Reminvail on a quest to become the greatest blacksmith of all time! \nTo play this game, you will answer command prompts like you just did so dutifully and accurately. You will need to be precise \nbecause this is a command terminal game and command terminal games are stupid. \nYou will need to spend money on raw materials as well as on upkeep for your smithing equipment. With \nthose materials and equipment, you can create various products to sell off and make more money in return, or on equipment to grant you passive bonuses.");
+        response = ask("Are you ready to begin?");
+        if(response == 1) say("That's the spirit! Off to your blacksmithing journey you go!");
+        else if(response == 2) say("Just because you hesitate doesn't mean your fortune will! On you go!");
+        else say("Look at this loser who can't figure out how to answer a simple yes-no question! I can't wait to see you go horribly bankrupt.");
+        location = 0;
+        while(true)
+        {
+            if(gold <= 10 && inv3.size() <= 1 && inv4.size() <= 1 && inv1.size() <= 1 && inv2.size() <= 1)
+            {
+                say("Uh-oh! It looks like you went bankrupt, and there's nothing else you can sell for extra cash. You lose!");
+                System.exit(0);
+            }
+            if(location == 0)
+            {
+                say("You are at the front counter of your shop, watching out at the people of the city bumbling around the streets. Idle chatter fills the air.");
+                response = ask("What would you like to do?", location);
+                //if(response == 1 && inv3
+            }
+            
+        }
+        //System.exit(0); //failsafe if the player gets somehow out of the loop beyond my knowledge
+    }
+    
+    static void say(String text)
+    {
+        try
+        {
+            Thread.sleep(textSpeed);
+        }
+        catch(Exception e)
+        {
+            System.out.println("An output error has occurred - sorry!");
+        }
+        System.out.println(text);
+    }
+    static int ask(String text)
+    {
+        try
+        {
+            Thread.sleep(textSpeed);
+        }
+        catch(Exception e)
+        {
+            System.out.print("");
+        }
+        System.out.println(text + "\n  1. Yes\n  2. No");
+        int reply = in.nextInt();
+        in.nextLine();
+        return reply;
+    }
+    static int ask(String text, int location)
+    {
+        try
+        {
+            Thread.sleep(textSpeed);
+        }
+        catch(Exception e)
+        {
+            System.out.print("");
+        }
+        int reply;
+        if(location == 0)
+        {
+            System.out.println(text + "\n  1. Put products out for sale\n  2. Go to the marketplace\n  3. Return to your workshop\n  ...\n  0. Quit");
+            reply = in.nextInt();
+            in.nextLine();
+        }
+        else if(location == 1)
+        {
+            System.out.println(text + "\n  1. Smelt ore into ingots\n  2. Carve wood into hilts\n  3. Assemble finished weapons\n  4. Go to the storefront\n  5. Head back to the mines\n  ...\n  0. Quit");
+            reply = in.nextInt();
+            in.nextLine();
+        }
+        else if(location == 2)
+        {
+            System.out.println(text + "\n  1. Purchase materials\n  2. Sell back materials\n  3. Return to the storefront\n  ...\n  0. Quit");
+            reply = in.nextInt();
+            in.nextLine();
+        }
+        else if(location == 3)
+        {
+            System.out.println(text + "\n  1. Try to mine for some ore\n  2. Return to your workshop\n  ...\n  0. Quit");
+            reply = in.nextInt();
+            in.nextLine();
+        }
+        else
+        {
+            System.out.println("It looks like you've gotten somewhere you shouldn't have. Sending you back home...");
+            reply = -1;
+        }
+        return reply;
+    }
+    
+    
+    //if for whatever reason you're looking at my source code and you have a better way to do this then i am ALL ears
+    static int findItemCount1(ArrayList<rawMaterial> inventory)
+    {
+        int result = 0;
+        for(int i = 0; i<inventory.size(); i++)
+        {
+            inventory.get(0).getAmount();
+        }
+        return result;
+    }
+    static int findItemCount2(ArrayList<processedMaterial> inventory)
+    {
+        int result = 0;
+        for(int i = 0; i<inventory.size(); i++)
+        {
+            inventory.get(0).getAmount();
+        }
+        return result;
+    }
+    static int findItemCount3(ArrayList<product> inventory)
+    {
+        int result = 0;
+        for(int i = 0; i<inventory.size(); i++)
+        {
+            inventory.get(0).getAmount();
+        }
+        return result;
+    }
+    static int findItemCount4(ArrayList<equipment> inventory)
+    {
+        int result = 0;
+        for(int i = 0; i<inventory.size(); i++)
+        {
+            inventory.get(0).getAmount();
+        }
+        return result;
+    }
+}
+                                                                                                                                                         

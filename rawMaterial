@@ -1,0 +1,73 @@
+public class rawMaterial 
+{
+    private int amount;
+    private int type;
+    
+    public rawMaterial(int amount, int type)
+    {
+        this.amount = amount;
+        this.type = type;
+    }
+    
+    void display() //for debug purposes
+    {
+        System.out.print(amount + " ");
+        System.out.println(type);
+    }
+    
+    void setNumber(int num)
+    {
+        amount = num;
+    }
+    
+    int getAmount()
+    {
+        return amount;
+    }
+    
+    int getPrice()
+    {
+        switch (type)
+        {
+            case 1: return 10;
+            case 2: return 10;
+            case 3: return 25;
+            case 4: return 25;
+            case 5: return 50;
+            case 6: return 75;
+            case 7: return 90;
+            case 8: return 125;
+            case 9: return 175;
+            case 10: return 250;
+            case 11: return 15;
+            case 12: return 40;
+            case 13: return 65;
+            case 14: return 100;
+            case 15: return 150;
+            default: return 1;
+        }
+    }
+    
+    String getName()
+    {
+        switch (type)
+        {
+            case 1: return "Copper Ore";
+            case 2: return "Tin Ore";
+            case 3: return "Iron Ore";
+            case 4: return "Coal";
+            case 5: return "Silver Ore";
+            case 6: return "Gold Ore";
+            case 7: return "Mythril Ore";
+            case 8: return "Platinum Ore";
+            case 9: return "Tungsten Ore";
+            case 10: return "Adamantine Ore";
+            case 11: return "Oak Wood";
+            case 12: return "Spruce Wood";
+            case 13: return "Ironwood";
+            case 14: return "Enchanted Wood";
+            case 15: return "Hellfire Wood";
+            default: return "material not found!";
+        }
+    }
+}

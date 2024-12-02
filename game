@@ -8,7 +8,7 @@ import java.util.*;
  */
 public class Game
 {
-    final static int textSpeed = 1000; //millisecond delay btwn messages
+    private final static int textSpeed = 1000; //millisecond delay btwn messages
     static Scanner in = new Scanner(System.in); //i do Not want to remake this for whatever nonsense i end up needing to
     public static void main(String[] args)
     {
@@ -53,7 +53,7 @@ public class Game
                     say("Oh, for God's sake. You understand. Stop being obstinant.");
                 else
                     say("Let me try again then. Maybe this time I'll get through to you. \nIn this game, when you see a prompt like that one, you must answer ONLY with one of the options. \nAdditionally, you may not type when you have not just immediately received one of those prompts. Otherwise, we will make fun of you.");
-            } while (response != 0);
+            } while (response != 1);
         }
         say("Here we go, then. This is a game about blacksmithing! In this game, you will take control of an up-and-coming blacksmith \nhailing from the beautiful country of Reminvail on a quest to become the greatest blacksmith of all time! \nTo play this game, you will answer command prompts like you just did so dutifully and accurately. You will need to be precise \nbecause this is a command terminal game and command terminal games are stupid. \nYou will need to spend money on raw materials as well as on upkeep for your smithing equipment. With \nthose materials and equipment, you can create various products to sell off and make more money in return, or on equipment to grant you passive bonuses.");
         response = ask("Are you ready to begin?");
@@ -63,7 +63,7 @@ public class Game
         location = 0;
         while(true)
         {
-            if(gold <= 10 && totalItems(inv1, inv2, inv3, inv4) == 0)
+            if(gold < 10  && totalItems(inv1, inv2, inv3, inv4) == 0)
             {
                 say("Uh-oh! It looks like you went bankrupt, and there's nothing else you can sell for extra cash. You lose!");
                 System.exit(0);
@@ -143,7 +143,12 @@ public class Game
                 response = ask("What would you like to do?", location);
                 if(response == 1)
                 {
-                    
+                    if(gold < 10)
+                        say("It looks like you don't have enough money to purchase anything! You should craft some products and sell them for some more funds.");
+                    else
+                    {
+                        
+                    }
                 }
                 else if(response == 2)
                 {
@@ -198,17 +203,23 @@ public class Game
         }
         System.out.println(text + "\n  1. Yes\n  2. No");
         int reply = 0;
-        try
+        boolean replyachieved = false;
+        while(!replyachieved)
         {
-            reply = in.nextInt();
+            try
+            {
+                reply = in.nextInt();
+                replyachieved = true;
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer.");
+            }
+            finally
+            {
+                in.nextLine();
+            }
         }
-        catch(InputMismatchException e)
-        {
-            say("That's not a valid answer.");
-            in.nextLine();
-            ask(text);
-        }
-        in.nextLine();
         return reply;
     }
     static int ask(String text, int location)
@@ -233,17 +244,23 @@ public class Game
             System.out.println("It looks like you've gotten somewhere you shouldn't have. Sending you back home...");
             return -1;
         }
-        try
+        boolean replyachieved = false;
+        while(!replyachieved)
         {
-            reply = in.nextInt();
+            try
+            {
+                reply = in.nextInt();
+                replyachieved = true;
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer.");
+            }
+            finally
+            {
+                in.nextLine();
+            }
         }
-        catch(InputMismatchException e)
-        {
-            say("That's not a valid answer.");
-            in.nextLine();
-            ask(text, location);
-        }
-        in.nextLine();
         return reply;
     }
     

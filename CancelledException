@@ -1,0 +1,17 @@
+class CancelledException extends Exception
+{
+    public CancelledException() {}
+    public CancelledException(String message)
+    {
+        super(message);
+    }
+    public CancelledException(Throwable cause)
+    {
+        super(cause);
+    }
+    public CancelledException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+}
+

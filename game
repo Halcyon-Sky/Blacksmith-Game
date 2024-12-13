@@ -9,18 +9,20 @@ import java.util.*;
 public class Game
 {
     private final static int textSpeed = 1000; //millisecond delay btwn messages
-    static Scanner in = new Scanner(System.in); //i do Not want to remake this for whatever nonsense i end up needing to
+    private static Scanner in = new Scanner(System.in); //i do Not want to remake these for whatever nonsense i end up needing to
+    private static ArrayList<rawMaterial> inv1 = new ArrayList<rawMaterial>();
+    private static ArrayList<processedMaterial> inv2 = new ArrayList<processedMaterial>();
+    private static ArrayList<product> inv3 = new ArrayList<product>();
+    private static ArrayList<equipment> inv4 = new ArrayList<equipment>();
+    private static int gold = 50;
     public static void main(String[] args)
     {
         //inventory setup
-        int gold = 50;
-        ArrayList<rawMaterial> inv1 = new ArrayList<rawMaterial>();
-        ArrayList<processedMaterial> inv2 = new ArrayList<processedMaterial>();
-        ArrayList<product> inv3 = new ArrayList<product>();
-        ArrayList<equipment> inv4 = new ArrayList<equipment>();
+        
         for(int i = 0; i < 15; i++)
         {
             inv1.add(i, new rawMaterial(0, i+1)); 
+            System.out.println(inv1.get(i));
         }
         for(int i = 0; i < 30; i++)
         {
@@ -30,7 +32,7 @@ public class Game
         {
             inv3.add(i, new product(0, i+1));
         }
-        for(int i = 0; i < 2; i++) //TODO update to match eventual number of equipment items
+        for(int i = 0; i < 1; i++) //TODO update to match eventual number of equipment items
         {
             inv4.add(i, new equipment(0, i+1));
         }
@@ -147,7 +149,18 @@ public class Game
                         say("It looks like you don't have enough money to purchase anything! You should craft some products and sell them for some more funds.");
                     else
                     {
-                        
+                        try
+                        {
+                            askPurchase();
+                        }
+                        catch(InventoryMismanagementException e)
+                        {
+                            say("Frustrated at your attempt to swindle him, the owner of the shop throws you out bodily. \"Next time you come here,\" he shouts, \"you better not try anything funny!\"");
+                        }
+                        catch(CancelledException e)
+                        {
+                            say("You change your mind and decide to leave the shop.");
+                        }
                     }
                 }
                 else if(response == 2)
@@ -186,7 +199,7 @@ public class Game
         }
         catch(Exception e)
         {
-            System.out.println("An output error has occurred - sorry!");
+            System.out.print("");
         }
         System.out.println(text);
     }
@@ -264,6 +277,80 @@ public class Game
         return reply;
     }
     
+    static int askPurchase() throws InventoryMismanagementException, CancelledException
+    {
+        int reply = 0;
+        int reply2 = 0;
+        int page = 0;
+        boolean replyachieved = false;
+        while(!replyachieved)
+        {
+            if(page %2 == 0)
+            {
+                say("You have " + gold + " gold remaining.");
+                say("What would you like to purchase?\n  1. Copper Ore - 10\n  2. Tin Ore - 10\n  3. Iron Ore - 25\n  4. Coal - 25\n  5. Silver Ore - 50\n  6. Gold Ore - 75\n  7. Mythril Ore - 90\n  8. Platinum Ore - 125\n  9. Tungsten Ore - 175\n  0. Next Page");
+            }
+            else
+            {
+                say("You have " + gold + " gold remaining.");
+                say("What would you like to purchase?\n  10. Adamantine Ore - 250\n.  11. Oak Wood - 15\n  12. Spruce Wood - 40\n  13. Ironwood - 65\n  14. Enchanted Wood - 100\n  15. Hellfire Wood - 150\n  16. Quit\n 0. Previous Page");
+            }
+            try
+            {
+                reply = in.nextInt();
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer.");
+                continue;   
+            }
+            finally
+            {
+                in.nextLine();
+            }
+            if(reply == 0)
+            {
+                page++;
+            }
+            else if(reply <0 && reply > 16)
+            {
+                say("Think you're smart, do you? Try again, bozo.");
+            }
+            else if(reply == 16)
+            {
+                throw new CancelledException();
+            }
+            else
+            {
+                say("How many would you like to purchase?");
+                try
+                {
+                    reply2 = in.nextInt();
+                }
+                catch(InputMismatchException e)
+                {
+                    say("That's not a valid answer.");
+                    continue;
+                }
+                finally
+                {
+                    in.nextLine();
+                }
+                if(gold < inv1.get(reply-1).getPrice() * reply2)
+                {
+                    throw new InventoryMismanagementException();
+                }
+                else
+                {
+                    say("Successfully purchased " + reply2 + " " + inv1.get(reply-1).getName() + ".");
+                    inv1.get(reply-1).setNumber(inv1.get(reply-1).getAmount() + reply2);
+                    System.out.println(inv1.get(reply-1).toString());
+                    gold -= inv1.get(reply-1).getPrice() * reply2;
+                }
+            }
+        }
+        return reply;
+    }
     
     //if for whatever reason you're looking at my source code and you have a better way to do this then i am ALL ears
     static int totalItems(ArrayList<rawMaterial> first, ArrayList<processedMaterial> second, ArrayList<product> third, ArrayList<equipment> fourth)
@@ -275,7 +362,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(0).getAmount();
+            inventory.get(i).getAmount();
         }
         return result;
     }
@@ -284,7 +371,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(0).getAmount();
+            inventory.get(i).getAmount();
         }
         return result;
     }
@@ -293,7 +380,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(0).getAmount();
+            inventory.get(i).getAmount();
         }
         return result;
     }
@@ -302,7 +389,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(0).getAmount();
+            inventory.get(i).getAmount();
         }
         return result;
     }

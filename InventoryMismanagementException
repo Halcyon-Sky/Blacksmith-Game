@@ -1,0 +1,16 @@
+class InventoryMismanagementException extends Exception
+{
+    public InventoryMismanagementException() {}
+    public InventoryMismanagementException(String message)
+    {
+        super(message);
+    }
+    public InventoryMismanagementException(Throwable cause)
+    {
+        super(cause);
+    }
+    public InventoryMismanagementException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+}

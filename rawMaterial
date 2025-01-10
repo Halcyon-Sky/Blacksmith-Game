@@ -9,7 +9,7 @@ public class rawMaterial
         this.type = type;
     }
     
-    void setNumber(int num)
+    void setAmount(int num)
     {
         amount = num;
     }

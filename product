@@ -15,7 +15,7 @@ public class product
         System.out.println(type);
     }
     
-    void setNumber(int num)
+    void setAmount(int num)
     {
         amount = num;
     }
@@ -68,7 +68,7 @@ public class product
             case 12: result += "Tungsten "; break;
             case 13: result += "Duralite "; break;
             case 14: result += "Adamantine "; break;
-            default: return "item not found!";
+            default: return "ITEM NOT FOUND";
         }
         
         switch (type % 8)
@@ -81,8 +81,18 @@ public class product
             case 5: result += "Axe"; break;
             case 6: result += "Spear"; break;
             case 7: result += "Halberd"; break;
-            default: return "item not found!";
+            default: return "ITEM NOT FOUND";
         }
+        return result;
+    }
+    
+    String getRecipe()
+    {
+        String result = "";
+        String name = this.getName();
+        String beginning = name.substring(0,name.indexOf(" "));
+        String end = name.substring(name.indexOf(" ") + 1);
+        
         return result;
     }
 }

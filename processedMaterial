@@ -15,7 +15,7 @@ public class processedMaterial
         System.out.println(type);
     }
     
-    void setNumber(int num)
+    void setAmount(int num)
     {
         amount = num;
     }
@@ -59,7 +59,54 @@ public class processedMaterial
             case 28: return "Ironwood Haft";
             case 29: return "Enchanted Haft";
             case 30: return "Hellfire Haft";
-            default: return "material not found!";
+            default: return "ITEM NOT FOUND";
+        }
+    }
+    String getRecipe()
+    {
+        switch (type)
+        {
+            case 1: return "2x Copper Ore";
+            case 2: return "2x Tin Ore";
+            case 3: return "2x Copper Ore, 2x Tin Ore";
+            case 4: return "3x Iron Ore";
+            case 5: return "3x Iron Ore and 1x Coal";
+            case 6: return "4x Silver Ore";
+            case 7: return "4x Gold Ore";
+            case 8: return "4x Mythril Ore";
+            case 9: return "3x Silver Ore, 3x Gold Ore";
+            case 10: return "4x Silver Ore, 2x Coal Ore";
+            case 11: return "3x Mythril Ore, 3x Iron Ore";
+            case 12: return "4x Platinum Ore";
+            case 13: return "5x Tungsten Ore";
+            case 14: return "3x Tungsten Ore, 3x Mythril Ore, 5x Copper Ore";
+            case 15: return "5x Adamantine Ore, 2x Mythril Ore";
+            case 16: return "1x Oak Wood";
+            case 17: return "1x Spruce Wood";
+            case 18: return "1x Ironwood";
+            case 19: return "1x Enchanted Wood";
+            case 20: return "1x Hellfire Wood";
+            case 21: return "3x Oak Wood";
+            case 22: return "3x Spruce Wood";
+            case 23: return "3x Ironwood";
+            case 24: return "3x Enchanted Wood";
+            case 25: return "3x Hellfire Wood";
+            case 26: return "6x Oak Wood";
+            case 27: return "6x Spruce Wood";
+            case 28: return "6x Ironwood";
+            case 29: return "6x Enchanted Wood";
+            case 30: return "6x Hellfire Wood";
+            default: return "ITEM NOT FOUND";
+        }
+    }
+    int getMaterialID(String recipe)
+    {
+        switch(recipe)
+        {
+            case "2x Copper Ore": return 1;
+            case "2x Tin Ore": return 2;
+            case "2x Copper Ore, 2x Tin Ore": return 3;
+            default: return 0;
         }
     }
 }

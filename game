@@ -8,21 +8,28 @@ import java.util.*;
  */
 public class Game
 {
-    private final static int textSpeed = 1000; //millisecond delay btwn messages
+    private static int textSpeed; //millisecond delay btwn messages
     private static Scanner in = new Scanner(System.in); //i do Not want to remake these for whatever nonsense i end up needing to
     private static ArrayList<rawMaterial> inv1 = new ArrayList<rawMaterial>();
     private static ArrayList<processedMaterial> inv2 = new ArrayList<processedMaterial>();
     private static ArrayList<product> inv3 = new ArrayList<product>();
     private static ArrayList<equipment> inv4 = new ArrayList<equipment>();
     private static int gold = 50;
-    public static void main(String[] args)
+    public static void main(int[] args)
     {
         //inventory setup
+        try
+        {
+            textSpeed = (args[0]);
+        }
+        catch(Exception e)
+        {
+            textSpeed = 1000;
+        }
         
         for(int i = 0; i < 15; i++)
         {
-            inv1.add(i, new rawMaterial(0, i+1)); 
-            System.out.println(inv1.get(i));
+            inv1.add(i, new rawMaterial(0, i+1));
         }
         for(int i = 0; i < 30; i++)
         {
@@ -36,7 +43,7 @@ public class Game
         {
             inv4.add(i, new equipment(0, i+1));
         }
-        inv1.get(0).setNumber(5);
+        inv1.get(0).setAmount(5);
         int response = ask("Welcome to the Blacksmith Game! Would you like a tutorial?");
         int location = -1; //-1 for the tutorial, 0 for the storefront, 1 for the workshop, 2 for the market
         if(response == 1)
@@ -63,7 +70,7 @@ public class Game
         else if(response == 2) say("Just because you hesitate doesn't mean your fortune will! On you go!");
         else say("Look at this loser who can't figure out how to answer a simple yes-no question! I can't wait to see you go horribly bankrupt.");
         location = 0;
-        while(true)
+        while(true) //whoever first said that while true loops arent good formatting i have several questions
         {
             if(gold < 10  && totalItems(inv1, inv2, inv3, inv4) == 0)
             {
@@ -151,7 +158,7 @@ public class Game
                     {
                         try
                         {
-                            askPurchase();
+                            purchase();
                         }
                         catch(InventoryMismanagementException e)
                         {
@@ -165,7 +172,23 @@ public class Game
                 }
                 else if(response == 2)
                 {
-                    
+                    if(totalRawMats(inv1) < 1)
+                        say("It looks like you don't have anything to resell. If you need money, try selling some of your products.");
+                    else
+                    {
+                        try
+                        {
+                            resell();
+                        }
+                        catch(InventoryMismanagementException e)
+                        {
+                            say("Frustrated at your attempt to swindle him, the owner of the shop throws you out bodily. \"Next time you come here,\" he shouts, \"you better not try anything funny!\"");
+                        }
+                        catch(CancelledException e)
+                        {
+                            say("You change your mind and decide to leave the shop.");
+                        }
+                    }
                 }
                 else if(response == 3)
                 {
@@ -277,13 +300,182 @@ public class Game
         return reply;
     }
     
-    static int askPurchase() throws InventoryMismanagementException, CancelledException
+    static void resell() throws InventoryMismanagementException, CancelledException
     {
+        int page = 0;
+        int reply = 0;
+        int reply2 = 0; //reply is used to pick a resell product and reply2 to pick how many are to be resold
+        String contents = "";
+        while(true)
+        {
+            if(page%2 == 0)
+            {
+                say("You have " + gold + " gold remaining.");
+                for(int i = 0; i < 9; i++)
+                {
+                    contents += "\n  " + (i+1) + ". ";
+                    contents += inv1.get(i).getName() + "(" + inv1.get(i).getAmount() + ")";
+                }
+                contents += "\n  0. Next Page";
+                say("What would you like to resell?" + contents);
+            }
+            else
+            {
+                say("You have " + gold + " gold remaining.");
+                for(int i = 9; i < 15; i++)
+                {
+                    contents += "\n  " + (i + 1) + ". ";
+                    contents += inv1.get(i).getName() + "(" + inv1.get(i).getAmount() + ")";
+                }
+                contents += "\n  16. Quit\n  0. Previous Page";
+                say("What would you like to resell?" + contents);
+            }
+            try
+            {
+                reply = in.nextInt();
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer");
+                continue;
+            }
+            finally
+            {
+                in.nextLine();
+            }
+            if(reply == 0)
+            {
+                page++;
+                contents = "";
+            }
+            else if(reply < 0 || reply > 16)
+            {
+                say("That's not a valid answer. Try again.");
+            }
+            else if(reply == 16)
+            {
+                throw new CancelledException();
+            }
+            else
+            {
+                say("You have " + inv1.get(reply-1).getAmount() + " " + inv1.get(reply-1).getName() + " in your inventory.");
+                say("How many would you like to resell?");
+                try
+                {
+                    reply2 = in.nextInt();
+                }
+                catch(InputMismatchException e)
+                {
+                    say("That's not a valid answer. Try again.");
+                    continue;
+                }
+                finally
+                {
+                    in.nextLine();
+                }
+                if(reply2 > inv1.get(reply-1).getAmount())
+                    throw new InventoryMismanagementException();
+                else
+                {
+                    say("You sell " + reply2 + " " + inv1.get(reply-1).getName() + " back to the market.");
+                    inv1.get(reply-1).setAmount(inv1.get(reply-1).getAmount() - reply2);
+                    int g = (int)(inv1.get(reply-1).getPrice() * reply2 / 4.0);
+                    say("You earn " + g + " gold in return.");
+                    gold += g;
+                    break;
+                }
+            }
+        }
+        return;
+    }
+    
+    static void forge() throws InventoryMismanagementException, CancelledException
+    {
+        int page = 0;
         int reply = 0;
         int reply2 = 0;
+        String contents = "";
+        while(true)
+        {
+            if(page%2 == 0)
+            {
+                for(int i = 0; i < 9; i++)
+                {
+                    contents += "\n  " + (i+1) + ". ";
+                    contents += inv2.get(i).getName() + "(" + inv2.get(i).getAmount() + ")";
+                }
+                contents += "\n  0. Next Page";
+                say("Which material would you like to forge?" + contents);
+            }
+            else
+            {
+                for(int i = 9; i < 15; i++)
+                {
+                    contents += "\n  " + (i + 1) + ". ";
+                    contents += inv2.get(i).getName() + "(" + inv2.get(i).getAmount() + ")";
+                }
+                contents += "\n  16. Quit\n  0. Previous Page";
+                say("Which material would you like to forge?" + contents);
+            }
+            try
+            {
+                reply = in.nextInt();
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer. Try again.");
+                continue;
+            }
+            finally
+            {
+                in.nextLine();
+            }
+            if(reply == 0)
+            {
+                page++;
+                contents = "";
+            }
+            else if(reply < 0 || reply > 16)
+            {
+                say("That's not a valid answer. Try again.");
+            }
+            else if(reply == 16)
+            {
+                throw new CancelledException();
+            }
+            else
+            {
+                say("Forging a(n) " + inv2.get(reply).getName() + " requires " + inv2.get(reply).getRecipe());
+                String recipe = inv2.get(reply).getRecipe();
+                if(recipe.indexOf(',') == -1)
+                {
+                    int recipeCost = recipe.charAt(1);
+                }
+            }
+        }
+    }
+    
+    static void carve() throws InventoryMismanagementException, CancelledException
+    {
+        
+    }
+    
+    static void sell() throws InventoryMismanagementException, CancelledException
+    {
+        
+    }
+    
+    static void craft() throws InventoryMismanagementException, CancelledException
+    {
+        
+    }
+    
+    static void purchase() throws InventoryMismanagementException, CancelledException
+    {
+        int reply = 0;
+        int reply2 = 0; //reply is used to pick what product to purchase and reply2 is to pick how many.
         int page = 0;
-        boolean replyachieved = false;
-        while(!replyachieved)
+        while(true)
         {
             if(page %2 == 0)
             {
@@ -293,7 +485,7 @@ public class Game
             else
             {
                 say("You have " + gold + " gold remaining.");
-                say("What would you like to purchase?\n  10. Adamantine Ore - 250\n.  11. Oak Wood - 15\n  12. Spruce Wood - 40\n  13. Ironwood - 65\n  14. Enchanted Wood - 100\n  15. Hellfire Wood - 150\n  16. Quit\n 0. Previous Page");
+                say("What would you like to purchase?\n  10. Adamantine Ore - 250\n.  11. Oak Wood - 15\n  12. Spruce Wood - 40\n  13. Ironwood - 65\n  14. Enchanted Wood - 100\n  15. Hellfire Wood - 150\n  16. Quit\n  0. Previous Page");
             }
             try
             {
@@ -312,9 +504,9 @@ public class Game
             {
                 page++;
             }
-            else if(reply <0 && reply > 16)
+            else if(reply <0 || reply > 16)
             {
-                say("Think you're smart, do you? Try again, bozo.");
+                say("That's not a valid answer. Try again.");
             }
             else if(reply == 16)
             {
@@ -343,13 +535,13 @@ public class Game
                 else
                 {
                     say("Successfully purchased " + reply2 + " " + inv1.get(reply-1).getName() + ".");
-                    inv1.get(reply-1).setNumber(inv1.get(reply-1).getAmount() + reply2);
-                    System.out.println(inv1.get(reply-1).toString());
+                    inv1.get(reply-1).setAmount(inv1.get(reply-1).getAmount() + reply2);
                     gold -= inv1.get(reply-1).getPrice() * reply2;
+                    break;
                 }
             }
         }
-        return reply;
+        return;
     }
     
     //if for whatever reason you're looking at my source code and you have a better way to do this then i am ALL ears
@@ -362,7 +554,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(i).getAmount();
+            result += inventory.get(i).getAmount();
         }
         return result;
     }
@@ -371,7 +563,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(i).getAmount();
+            result += inventory.get(i).getAmount();
         }
         return result;
     }
@@ -380,7 +572,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(i).getAmount();
+            result += inventory.get(i).getAmount();
         }
         return result;
     }
@@ -389,7 +581,7 @@ public class Game
         int result = 0;
         for(int i = 0; i<inventory.size(); i++)
         {
-            inventory.get(i).getAmount();
+            result += inventory.get(i).getAmount();
         }
         return result;
     }

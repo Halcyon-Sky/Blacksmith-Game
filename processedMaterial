@@ -1,4 +1,4 @@
-public class processedMaterial
+public class processedMaterial implements item
 {
     private int amount;
     private int type;
@@ -9,23 +9,45 @@ public class processedMaterial
         this.type = type;
     }
     
-    void display() //for debug purposes
-    {
-        System.out.print(amount + " ");
-        System.out.println(type);
-    }
-    
-    void setAmount(int num)
+    public void setAmount(int num)
     {
         amount = num;
     }
     
-    int getAmount()
+    public void spend(int num)
+    {
+        amount -= num;
+    }
+    
+    public int getAmount()
     {
         return amount;
     }
     
-    String getName()
+    public int getPrice()
+    {
+        switch (type)
+        {
+            case 1: return 20;
+            case 2: return 20;
+            case 3: return 40;
+            case 4: return 75;
+            case 5: return 100;
+            case 6: return 200;
+            case 7: return 300;
+            case 8: return 360;
+            case 9: return 375;
+            case 10: return 150;
+            case 11: return 345;
+            case 12: return 500;
+            case 13: return 875;
+            case 14: return 845;
+            case 15: return 1430;
+            default: return 0;
+        }
+    }
+    
+    public String getName()
     {
         switch (type)
         {
@@ -70,7 +92,7 @@ public class processedMaterial
             case 2: return "2x Tin Ore";
             case 3: return "2x Copper Ore, 2x Tin Ore";
             case 4: return "3x Iron Ore";
-            case 5: return "3x Iron Ore and 1x Coal";
+            case 5: return "3x Iron Ore, 1x Coal";
             case 6: return "4x Silver Ore";
             case 7: return "4x Gold Ore";
             case 8: return "4x Mythril Ore";
@@ -97,16 +119,6 @@ public class processedMaterial
             case 29: return "6x Enchanted Wood";
             case 30: return "6x Hellfire Wood";
             default: return "ITEM NOT FOUND";
-        }
-    }
-    int getMaterialID(String recipe)
-    {
-        switch(recipe)
-        {
-            case "2x Copper Ore": return 1;
-            case "2x Tin Ore": return 2;
-            case "2x Copper Ore, 2x Tin Ore": return 3;
-            default: return 0;
         }
     }
 }

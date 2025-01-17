@@ -1,57 +1,93 @@
-public class product
+import java.util.Random;
+public class product implements item
 {
     private int amount;
     private int type;
+    private int hiltType;
     
     public product(int amount, int type)
     {
         this.amount = amount;
         this.type = type;
+        this.hiltType = 0;
     }
     
-    void display() //for debug purposes
-    {
-        System.out.print(amount + " ");
-        System.out.println(type);
-    }
-    
-    void setAmount(int num)
+    public void setAmount(int num)
     {
         amount = num;
     }
     
-    int getAmount()
+    public int getAmount()
     {
         return amount;
     }
     
-    int getPrice()
+    public void spend(int num)
     {
-        switch (type)
-        {
-            case 1: return 10;
-            case 2: return 10;
-            case 3: return 25;
-            case 4: return 25;
-            case 5: return 50;
-            case 6: return 75;
-            case 7: return 90;
-            case 8: return 125;
-            case 9: return 175;
-            case 10: return 250;
-            case 11: return 15;
-            case 12: return 40;
-            case 13: return 65;
-            case 14: return 100;
-            case 15: return 150;
-            default: return 1;
-        }
+        amount -= num;
     }
     
-    String getName()
+    public void setHilt(int mat)
+    {
+        hiltType = mat;
+    }
+    
+    public int getPrice()
+    {
+        double modifier = 1.0;
+        double price = 0.0;
+        processedMaterial holder = new processedMaterial(0, ((type-1)/8)+1);
+        price += holder.getPrice() / 2.0; //adds the default price to the variable, that being half the price of the material
+        Random rand = new Random();
+        double multiplier = rand.nextInt(85,116);
+        price *= (0.01 * multiplier); //multiplies the price by a random modifier between -15% and +15%
+        
+        switch (type%8) //multiplies the price by the modifier for the weapon type
+        {
+            case 0: price *= 10 * modifier; return (int)price; //this returns early because it works only for shields, which have no hilt type
+            case 1: price *= 2.5; break;
+            case 2: price *= 3.5; break;
+            case 3: price *= 5.5; break;
+            case 4: price *= 7; break;
+            case 5: price *= 6; break;
+            case 6: price *= 4; break;
+            case 7: price *= 8; break;
+        }
+        switch ((type-1)/8) //adds a penalty to the modifier to incentivize using stronger hilts for stronger weapons
+        {
+            case 0: break;
+            case 1: modifier-=0.05; break;
+            case 2: modifier-=0.1; break;
+            case 3: modifier-=0.2; break;
+            case 4: modifier-=0.3; break;
+            case 5: modifier-=0.45; break;
+            case 6: modifier-=0.55; break;
+            case 7: modifier-=0.66; break;
+            case 8:
+            case 9:
+            case 10: modifier-=0.7; break;
+            case 11: modifier-=0.8; break;
+            case 12: modifier-=1.0; break;
+            case 13: modifier-=1.4; break;
+            case 14: modifier-=1.8; break;
+            default:
+        }
+        switch(hiltType) //adds the hilt type boost to the modifier
+        {
+            case 0: break;
+            case 1: modifier+=0.25; break;
+            case 2: modifier+=0.5; break;
+            case 3: modifier+=0.75; break;
+            case 4: modifier+=1.0; break;
+        }
+        price *= modifier;
+        return (int)(Math.round(price));
+    }
+    
+    public String getName()
     {
         String result = "";
-        switch (type - 1 / 8)
+        switch ((type-1)/8)
         {
             case 0: result += "Copper "; break;
             case 1: result += "Tin "; break;
@@ -71,7 +107,7 @@ public class product
             default: return "ITEM NOT FOUND";
         }
         
-        switch (type % 8)
+        switch (type%8)
         {
             case 0: result += "Shield"; break;
             case 1: result += "Dagger"; break;

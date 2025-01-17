@@ -1,4 +1,4 @@
-public class rawMaterial 
+public class rawMaterial implements item
 {
     private int amount;
     private int type;
@@ -9,12 +9,17 @@ public class rawMaterial
         this.type = type;
     }
     
-    void setAmount(int num)
+    public void setAmount(int num)
     {
         amount = num;
     }
     
-    int getAmount()
+    public void spend(int num)
+    {
+        amount -= num;
+    }
+    
+    public int getAmount()
     {
         return amount;
     }
@@ -42,7 +47,7 @@ public class rawMaterial
         }
     }
     
-    String getName()
+    public String getName()
     {
         switch (type)
         {
@@ -61,7 +66,7 @@ public class rawMaterial
             case 13: return "Ironwood";
             case 14: return "Enchanted Wood";
             case 15: return "Hellfire Wood";
-            default: return "material not found!";
+            default: return "ITEM NOT FOUND";
         }
     }
     

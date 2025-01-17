@@ -1,15 +1,14 @@
-import java.io.*;
 import java.util.*;
 /**
  * The main game environment for the Blacksmith Game.
  *
- * @author Jack Corbett
- * @version 11/27/2024
+ * by Jack Corbett
+ * version from 1/13/2025
  */
 public class Game
 {
     private static int textSpeed; //millisecond delay btwn messages
-    private static Scanner in = new Scanner(System.in); //i do Not want to remake these for whatever nonsense i end up needing to
+    private static Scanner in = new Scanner(System.in); //i do Not want to remake these for every time i need them
     private static ArrayList<rawMaterial> inv1 = new ArrayList<rawMaterial>();
     private static ArrayList<processedMaterial> inv2 = new ArrayList<processedMaterial>();
     private static ArrayList<product> inv3 = new ArrayList<product>();
@@ -20,30 +19,34 @@ public class Game
         //inventory setup
         try
         {
-            textSpeed = (args[0]);
+            textSpeed = Math.abs(args[0]);
         }
         catch(Exception e)
         {
             textSpeed = 1000;
         }
         
+        int u = 0; //debug menu option, entering -57 for args[0] fills all inventories to 50
+        if(args[0] == -57)
+        {
+            textSpeed = 0;
+            u = 50;
+            gold = 9999;
+        }
         for(int i = 0; i < 15; i++)
         {
-            inv1.add(i, new rawMaterial(0, i+1));
+            inv1.add(i, new rawMaterial(u, i+1));
         }
         for(int i = 0; i < 30; i++)
         {
-            inv2.add(i, new processedMaterial(0, i+1));
+            inv2.add(i, new processedMaterial(u, i+1));
         }
         for(int i = 0; i < 120; i++)
         {
-            inv3.add(i, new product(0, i+1));
+            inv3.add(i, new product(u, i+1));
         }
-        for(int i = 0; i < 1; i++) //TODO update to match eventual number of equipment items
-        {
-            inv4.add(i, new equipment(0, i+1));
-        }
-        inv1.get(0).setAmount(5);
+        inv4.add(0, new equipment(0,1)); //This is currently filler just to populate the inv4 inventory: equipment as of 1.0.0 goes unused.
+        inv1.get(0).setAmount(u+5);
         int response = ask("Welcome to the Blacksmith Game! Would you like a tutorial?");
         int location = -1; //-1 for the tutorial, 0 for the storefront, 1 for the workshop, 2 for the market
         if(response == 1)
@@ -70,12 +73,30 @@ public class Game
         else if(response == 2) say("Just because you hesitate doesn't mean your fortune will! On you go!");
         else say("Look at this loser who can't figure out how to answer a simple yes-no question! I can't wait to see you go horribly bankrupt.");
         location = 0;
+        
+        
+        /*
+         * MAIN GAME LOOP BEGINS HERE
+         */
         while(true) //whoever first said that while true loops arent good formatting i have several questions
         {
-            if(gold < 10  && totalItems(inv1, inv2, inv3, inv4) == 0)
+            if(gold < 10  && totalItems() == 0)
             {
                 say("Uh-oh! It looks like you went bankrupt, and there's nothing else you can sell for extra cash. You lose!");
-                System.exit(0);
+                response = ask("Do you want to play again?");
+                if(response == 1)
+                    main(args);
+                else
+                    System.exit(0);
+            }
+            if(gold >= 10000)
+            {
+                say("Success! With your newest sale, you have become the most successful blacksmith of all time! You win!");
+                response = ask("Do you want to play again?");
+                if(response == 1)
+                    main(args);
+                else
+                    System.exit(0);
             }
             if(location == 0)
             {
@@ -85,6 +106,21 @@ public class Game
                 {
                     if(totalProducts(inv3) == 0 && totalEquipment(inv4) == 0) //TODO make the selling script
                         say("It doesn't look like you have anything to sell.");
+                    else
+                    {
+                        try
+                        {
+                            sell();
+                        }
+                        catch(InventoryMismanagementException e)
+                        {
+                            say("You can't sell products that you don't have!");
+                        }
+                        catch(CancelledException e)
+                        {
+                            say("You change your mind and cancel sales.");
+                        }
+                    }
                 }
                 else if(response == 2)
                 {
@@ -95,6 +131,17 @@ public class Game
                 {
                     say("Travelling to the workshop...");
                     location = 1;
+                }
+                else if(response == 4)
+                {
+                    try
+                    {
+                        checkInventory();
+                    }
+                    catch(CancelledException e)
+                    {
+                        continue;
+                    }
                 }
                 else if(response == 0)
                 {
@@ -118,17 +165,64 @@ public class Game
                 response = ask("What would you like to do?", location);
                 if(response == 1)
                 {
+                    try
+                    {
+                        forge();
+                    }
+                    catch(InventoryMismanagementException e)
+                    {
+                        say("It seems you don't have the correct materials to do that. Try again with a different recipe, or a different amount.");
+                    }
+                    catch(CancelledException e)
+                    {
+                        say("You change your mind and retrieve your materials from the furnace, unforged.");
+                    }
                 }
                 else if(response == 2)
                 {
+                    try
+                    {
+                        carve();
+                    }
+                    catch(InventoryMismanagementException e)
+                    {
+                        say("It seems you don't have the correct materials to do that. Try again with a different recipe, or a different amount.");
+                    }
+                    catch(CancelledException e)
+                    {
+                        say("You change your mind and retrieve your materials from the workbench, uncarved.");
+                    }
                 }
                 else if(response == 3)
                 {
+                    try
+                    {
+                        craft();
+                    }
+                    catch(InventoryMismanagementException e)
+                    {
+                        say("It seems you don't have the correct materials to do that. Try again with a different recipe, or a different amount.");
+                    }
+                    catch(CancelledException e)
+                    {
+                        say("You change your mind and retrieve your materials from the workbench, uncrafted.");
+                    }
                 }
                 else if(response == 4)
                 {
                     say("Travelling to the storefront...");
                     location = 0;
+                }
+                else if(response == 5)
+                {
+                    try
+                    {
+                        checkInventory();
+                    }
+                    catch(CancelledException e)
+                    {
+                        continue;
+                    }
                 }
                 else if(response == 0)
                 {
@@ -194,6 +288,17 @@ public class Game
                 {
                     say("Travelling to the storefront...");
                     location = 0;
+                }
+                else if(response == 4)
+                {
+                    try
+                    {
+                        checkInventory();
+                    }
+                    catch(CancelledException e)
+                    {
+                        continue;
+                    }
                 }
                 else if(response == 0)
                 {
@@ -270,11 +375,11 @@ public class Game
         }
         int reply = 0;
         if(location == 0)
-            System.out.println(text + "\n  1. Put products out for sale\n  2. Go to the marketplace\n  3. Return to your workshop\n  ...\n  0. Quit");
+            System.out.println(text + "\n  1. Put products out for sale\n  2. Go to the marketplace\n  3. Return to your workshop\n  4. Check your inventory\n  ...\n  0. Quit");
         else if(location == 1)
-            System.out.println(text + "\n  1. Smelt ore into ingots\n  2. Carve wood into hilts\n  3. Assemble finished weapons\n  4. Go to the storefront\n  ...\n  0. Quit");
+            System.out.println(text + "\n  1. Smelt ore into ingots\n  2. Carve wood into hilts\n  3. Assemble finished weapons\n  4. Go to the storefront\n  5. Check your inventory\n  ...\n  0. Quit");
         else if(location == 2)
-            System.out.println(text + "\n  1. Purchase materials\n  2. Sell back materials\n  3. Return to the storefront\n  ...\n  0. Quit");
+            System.out.println(text + "\n  1. Purchase materials\n  2. Sell back materials\n  3. Return to the storefront\n  4. Check your inventory\n  ...\n  0. Quit");
         else
         {
             System.out.println("It looks like you've gotten somewhere you shouldn't have. Sending you back home...");
@@ -373,12 +478,14 @@ public class Game
                 {
                     in.nextLine();
                 }
+                if(reply2 == 0)
+                    throw new CancelledException();
                 if(reply2 > inv1.get(reply-1).getAmount())
                     throw new InventoryMismanagementException();
                 else
                 {
                     say("You sell " + reply2 + " " + inv1.get(reply-1).getName() + " back to the market.");
-                    inv1.get(reply-1).setAmount(inv1.get(reply-1).getAmount() - reply2);
+                    inv1.get(reply-1).spend(reply2);
                     int g = (int)(inv1.get(reply-1).getPrice() * reply2 / 4.0);
                     say("You earn " + g + " gold in return.");
                     gold += g;
@@ -397,6 +504,7 @@ public class Game
         String contents = "";
         while(true)
         {
+            contents = "";
             if(page%2 == 0)
             {
                 for(int i = 0; i < 9; i++)
@@ -433,7 +541,6 @@ public class Game
             if(reply == 0)
             {
                 page++;
-                contents = "";
             }
             else if(reply < 0 || reply > 16)
             {
@@ -445,29 +552,365 @@ public class Game
             }
             else
             {
-                say("Forging a(n) " + inv2.get(reply).getName() + " requires " + inv2.get(reply).getRecipe());
+                reply--;
+                say("Forging a(n) " + inv2.get(reply).getName() + " requires " + inv2.get(reply).getRecipe() + ".");
                 String recipe = inv2.get(reply).getRecipe();
-                if(recipe.indexOf(',') == -1)
+                if(recipe.indexOf(',') == -1) //simple 1 material recipes
                 {
-                    int recipeCost = recipe.charAt(1);
+                    int recipeCost = Integer.parseInt(recipe.charAt(0) + "");
+                    int recipeMaterial;
+                    switch(recipe) 
+                    { 
+                        case "2x Copper Ore": recipeMaterial = 0; break;
+                        case "2x Tin Ore": recipeMaterial = 1; break;
+                        case "3x Iron Ore": recipeMaterial = 2; break;
+                        case "4x Silver Ore": recipeMaterial = 4; break;
+                        case "4x Gold Ore": recipeMaterial = 5; break;
+                        case "4x Mythril Ore": recipeMaterial = 6; break;
+                        case "4x Platinum Ore": recipeMaterial = 7; break;
+                        case "5x Tungsten Ore": recipeMaterial = 8; break;
+                        default: recipeMaterial = -1;
+                    }
+                    
+                    say("How many would you like to forge? Use 0 to cancel.");
+                    try
+                    {
+                        reply2 = in.nextInt();
+                    }
+                    catch(InputMismatchException e)
+                    {
+                        say("That's not a valid answer. Try again.");
+                        continue;
+                    }
+                    finally
+                    {
+                        in.nextLine();
+                    }
+                    if(reply2 == 0)
+                        throw new CancelledException();
+                    if(inv1.get(recipeMaterial).getAmount() < recipeCost * reply2)
+                    {
+                        say("" + inv1.get(recipeMaterial).getAmount());
+                        say("" + recipeCost * reply2);
+                        throw new InventoryMismanagementException();
+                    }
+                    else
+                    {
+                        say("Successfully forged " + reply2 + " " + inv2.get(reply).getName() + "!");
+                        inv1.get(recipeMaterial).spend(recipeCost * reply2);
+                        inv2.get(reply).spend(-1 * reply2);
+                        break;
+                    }
+                }
+                
+                else if(recipe.substring(recipe.indexOf(',')+1).indexOf(',') == -1) //two ingredient recipes for more complex ingots, this statement checks if there is a second comma in the name
+                {
+                    //since there are only 6 two-ingredient recipes we're just going to look for them individually
+                    int matCost1 = Integer.parseInt(recipe.charAt(0) + "");
+                    int matCost2 = Integer.parseInt(recipe.charAt(recipe.indexOf(",") + 2) + "");
+                    int matType1, matType2;
+                    switch(recipe)
+                    {
+                        case "2x Copper Ore, 2x Tin Ore": 
+                            matType1 = 0;
+                            matType2 = 1;
+                            break;
+                        case "3x Iron Ore, 1x Coal":
+                            matType1 = 2;
+                            matType2 = 3;
+                            break;
+                        case "3x Silver Ore, 3x Gold Ore":
+                            matType1 = 4;
+                            matType2 = 5;
+                            break;
+                        case "4x Silver Ore, 2x Coal Ore":
+                            matType1 = 4;
+                            matType2 = 3;
+                            break;
+                        case "3x Mythril Ore, 3x Iron Ore":
+                            matType1 = 6;
+                            matType2 = 2;
+                            break;
+                        case "5x Adamantine Ore, 2x Mythril Ore":
+                            matType1 = 9;
+                            matType2 = 6;
+                            break;
+                        default:
+                            matType1 = 0;
+                            matType2 = 1;
+                    }
+                    
+                    say("How many would you like to forge? Use 0 to cancel.");
+                    try
+                    {
+                        reply2 = in.nextInt();
+                    }
+                    catch(InputMismatchException e)
+                    {
+                        say("That's not a valid answer. Try again.");
+                        continue;
+                    }
+                    finally
+                    {
+                        in.nextLine();
+                    }
+                    if(reply2 == 0)
+                        throw new CancelledException();
+                    if(inv1.get(matType1).getAmount() < matCost1 * reply2 || inv1.get(matType2).getAmount() < matCost2 * reply2)
+                    {
+                        throw new InventoryMismanagementException();
+                    }
+                    else
+                    {
+                        say("Successfully forged " + reply2 + " " + inv2.get(reply).getName() + "!");
+                        inv1.get(matType1).spend(matCost1 * reply2);
+                        inv1.get(matType2).spend(matCost2 * reply2);
+                        inv2.get(reply).spend(-reply2);
+                        break;
+                    }
+                }
+                else //only reachable if the recipe contains 3 ingredients, meaning it is automatically a Duralite Ingot and we can hardcode a bit.
+                {
+                    say("How many would you like to forge? Use 0 to cancel.");
+                    try
+                    {
+                        reply2 = in.nextInt();
+                    }
+                    catch(InputMismatchException e)
+                    {
+                        say("That's not a valid answer. Try again.");
+                        continue;
+                    }
+                    finally
+                    {
+                        in.nextLine();
+                    }
+                    if(reply2 == 0)
+                        throw new CancelledException();
+                    if((inv1.get(8).getAmount() < 3 * reply2) || (inv1.get(6).getAmount() < 3 * reply2) || (inv1.get(0).getAmount() < 5 * reply2))
+                    {
+                        throw new InventoryMismanagementException();
+                    }
+                    else
+                    {
+                        say("Successfully forged " + reply2 + " " + inv2.get(reply).getName() + "!");
+                        inv1.get(8).spend(3 * reply2);
+                        inv1.get(6).spend(3 * reply2);
+                        inv1.get(0).spend(3 * reply2);
+                        inv2.get(13).spend(-1 * reply2);
+                        break;
+                    }
+                }
+            }
+        }
+        return;
+    }
+    
+    static void carve() throws InventoryMismanagementException, CancelledException
+    {
+        int page = 0;
+        int reply = 0;
+        int reply2 = 0;
+        String contents = "";
+        while(true)
+        {
+            contents = "";
+            if(page%2 == 0)
+            {
+                for(int i = 15; i < 24; i++)
+                {
+                    contents += "\n  " + (i-14) + ". ";
+                    contents += inv2.get(i).getName() + "(" + inv2.get(i).getAmount() + ")";
+                }
+                contents += "\n  0. Next Page";
+                say("Which material would you like to carve?" + contents);
+            }
+            else
+            {
+                for(int i = 24; i < 30; i++)
+                {
+                    contents += "\n  " + (i-14) + ". ";
+                    contents += inv2.get(i).getName() + "(" + inv2.get(i).getAmount() + ")";
+                }
+                contents += "\n  16. Quit\n  0. Previous Page";
+                say("Which material would you like to carve?" + contents);
+            }
+            try
+            {
+                reply = in.nextInt();
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer. Try again.");
+                continue;
+            }
+            finally
+            {
+                in.nextLine();
+            }
+            if(reply == 0)
+            {
+                page++;
+            }
+            else if(reply < 0 || reply > 16)
+            {
+                say("That's not a valid answer. Try again.");
+            }
+            else if(reply == 16)
+            {
+                throw new CancelledException();
+            }
+            else
+            {
+                reply+=14;
+                say("Carving a(n) " + inv2.get(reply).getName() + " requires " + inv2.get(reply).getRecipe() + ".");
+                String recipe = inv2.get(reply).getRecipe();
+                int recipeCost = Integer.parseInt(recipe.charAt(0) + "");
+                int recipeMaterial;
+                switch(recipe.substring(3,4))
+                { 
+                    case "O": recipeMaterial = 10; break;
+                    case "S": recipeMaterial = 11; break;
+                    case "I": recipeMaterial = 12; break;
+                    case "E": recipeMaterial = 13; break;
+                    case "H": recipeMaterial = 14; break;
+                    default: recipeMaterial = -1;
+                }
+                    
+                say("How many would you like to carve? Use 0 to cancel.");
+                try
+                {
+                    reply2 = in.nextInt();
+                }
+                catch(InputMismatchException e)
+                {
+                    say("That's not a valid answer. Try again.");
+                    continue;
+                }
+                finally
+                {
+                    in.nextLine();
+                }
+                if(reply2 == 0)
+                    throw new CancelledException();
+                    if(inv1.get(recipeMaterial).getAmount() < recipeCost * reply2)
+                    {
+                        say("" + inv1.get(recipeMaterial).getAmount());
+                        say("" + recipeCost * reply2);
+                        throw new InventoryMismanagementException();
+                    }
+                    else
+                    {
+                        say("Successfully forged " + reply2 + " " + inv2.get(reply).getName() + "!");
+                        inv1.get(recipeMaterial).spend(recipeCost * reply2);
+                        inv2.get(reply).spend(-1 * reply2);
+                        break;
                 }
             }
         }
     }
     
-    static void carve() throws InventoryMismanagementException, CancelledException
-    {
-        
-    }
-    
     static void sell() throws InventoryMismanagementException, CancelledException
     {
-        
+        //IDEA FOR THIS make a new Arraylist that takes the values from inv3 but only the ones with an amount > 0 to organise pages
     }
     
     static void craft() throws InventoryMismanagementException, CancelledException
     {
-        
+        int reply, reply2, reply3, page = 0;//reply is used to pick what product to make, reply2 for what material to use, reply3 for what hilt to use
+        String contents = "";
+        int requiredIngots, requiredHilt; //btwn 1= hilts, 2= greathilts, 3= hafts, and 0= none(shields)
+        while(true)
+        {
+            say("What product would you like to make?\n  1. Dagger (2 ingots and a hilt)\n  2. Shortsword (3 ingots and a hilt)\n  3. Longsword (5 ingots and a hilt)\n  4. Greatsword (6 ingots and a greathilt)\n  5. Axe (4 ingots and a haft)\n  6. Spear (2 ingots and a haft)\n  7. Halberd (6 ingots and a haft)\n  8. Shield (8 ingots)\n  ...\n  0. Cancel");
+            try
+            {
+                reply = in.nextInt();
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer.");
+                continue;
+            }
+            finally
+            {
+                in.nextLine();
+            }
+                
+            switch (reply)
+            {
+                case 0: throw new CancelledException();
+                case 1: requiredIngots = 2; requiredHilt = 1; break;
+                case 2: requiredIngots = 3; requiredHilt = 1; break;
+                case 3: requiredIngots = 5; requiredHilt = 1; break;
+                case 4: requiredIngots = 6; requiredHilt = 2; break;
+                case 5: requiredIngots = 4; requiredHilt = 3; break;
+                case 6: requiredIngots = 2; requiredHilt = 3; break;
+                case 7: requiredIngots = 6; requiredHilt = 3; break;
+                case 8: requiredIngots = 8; requiredHilt = 0; break;
+                default: say("That's not a valid answer."); continue;
+            }
+            
+            while(true) //picking material
+            {
+                contents = "";
+                if(page%2 == 0)
+                {
+                    contents = "\n  1. Copper\n  2. Tin\n  3. Bronze\n  4. Iron\n  5. Steel\n  6. Silver\n  7. Gold\n  8. Mythril\n  9. Electrum\n  0. Next Page";
+                    say("Which material would you like to use?" + contents);
+                }
+                else
+                {
+                    contents = "\n  10. Tarnished\n  11. Gleamsteel\n  12. Platinum\n  13. Tungsten\n  14. Duralite\n  15. Adamantine\n  16. Quit\n  0. Next Page";
+                    say("Which material would you like to use?" + contents);
+                }
+                
+                try
+                {
+                    reply2 = in.nextInt();
+                }
+                catch(InputMismatchException e)
+                {
+                    say("That's not a valid answer.");
+                    continue;
+                }
+                finally
+                {
+                    in.nextLine();
+                }
+                
+                if(reply2 == 0)
+                    page++;
+                else if(reply2 == 16)
+                    throw new CancelledException();
+                else if(reply2 < 0 || reply2 > 16)
+                {
+                    say("That's not a valid answer.");
+                    continue;
+                }
+                else
+                    break;
+            }
+            while(true)
+            {
+                if(reply2 == 8)
+                    break;
+                say("Which hilt material would you like to use?\n  1. Wooden\n  2. Sturdy\n  3. Ironwood\n  4. Enchanted Wood\n  5. Hellfire");
+                try
+                {
+                    reply2 = in.nextInt();
+                }
+                catch(InputMismatchException e)
+                {
+                    say("That's not a valid answer.");
+                    continue;
+                }
+                finally
+                {
+                    in.nextLine();
+                }
+            }
+        }
     }
     
     static void purchase() throws InventoryMismanagementException, CancelledException
@@ -528,6 +971,8 @@ public class Game
                 {
                     in.nextLine();
                 }
+                if(reply2 == 0)
+                    throw new CancelledException();
                 if(gold < inv1.get(reply-1).getPrice() * reply2)
                 {
                     throw new InventoryMismanagementException();
@@ -544,10 +989,88 @@ public class Game
         return;
     }
     
-    //if for whatever reason you're looking at my source code and you have a better way to do this then i am ALL ears
-    static int totalItems(ArrayList<rawMaterial> first, ArrayList<processedMaterial> second, ArrayList<product> third, ArrayList<equipment> fourth)
+    static void checkInventory() throws CancelledException
     {
-        return totalRawMats(first) + totalProcessedMats(second) + totalProducts(third) + totalEquipment(fourth);
+        int reply = 0;
+        while(true)
+        {
+            say("Which inventory would you like to check?\n  1. Raw Materials\n  2. Processed Materials\n  3. Products\n  ...\n  0. Quit");
+            try
+            {
+                reply = in.nextInt();
+            }
+            catch(InputMismatchException e)
+            {
+                say("That's not a valid answer. Try again.");
+                continue;
+            }
+            finally
+            {
+                in.nextLine();
+            }
+            
+            if(reply == 0)
+                throw new CancelledException();
+            else if(reply > 3 || reply < 0)
+            {
+                say("That's not a valid answer. Try again.");
+                continue;
+            }
+            else if(reply == 1)
+            {
+                if(totalRawMats(inv1) == 0)
+                {
+                    say("You have none of this item type!");
+                    return;
+                }
+                say("Raw Materials:");
+                for(int i = 0; i<inv1.size(); i++)
+                {
+                    if(inv1.get(i).getAmount() == 0)
+                        continue;
+                    System.out.println("  " + inv1.get(i).getName() + " (" + inv1.get(i).getAmount() + ")");
+                }
+                return;
+            }
+            else if(reply == 2)
+            {
+                if(totalProcessedMats(inv2) == 0)
+                {
+                    say("You have none of this item type!");
+                    return;
+                }
+                say("Processed Materials:");
+                for(int i = 0; i<inv2.size(); i++)
+                {
+                    if(inv2.get(i).getAmount() == 0)
+                        continue;
+                    System.out.println("  " + inv2.get(i).getName() + " (" + inv2.get(i).getAmount() + ")");
+                }
+                return;
+            }
+            else if(reply == 3)
+            {
+                if(totalProducts(inv3) == 0)
+                {
+                    say("You have none of this item type!");
+                    return;
+                }
+                say("Products:");
+                for(int i = 0; i<inv3.size(); i++)
+                {
+                    if(inv3.get(i).getAmount() == 0)
+                        continue;
+                    System.out.println("  " + inv3.get(i).getName() + " (" + inv3.get(i).getAmount() + ")");
+                }
+                return;
+            }
+        }
+    }
+    
+    //if for whatever reason you're looking at my source code and you have a better way to do this then i am ALL ears
+    static int totalItems()
+    {
+        return totalRawMats(inv1) + totalProcessedMats(inv2) + totalProducts(inv3); //+totalEquipment(inv4);
     }
     static int totalRawMats(ArrayList<rawMaterial> inventory)
     {

@@ -850,6 +850,7 @@ public class Game
                 case 8: requiredIngots = 8; requiredHilt = 0; break;
                 default: say("That's not a valid answer."); continue;
             }
+            break;
             
             while(true) //picking material
             {
@@ -893,12 +894,13 @@ public class Game
             }
             while(true)
             {
-                if(reply2 == 8)
+                if(reply2 == 8) //breaks because shields no hilts
                     break;
-                say("Which hilt material would you like to use?\n  1. Wooden\n  2. Sturdy\n  3. Ironwood\n  4. Enchanted Wood\n  5. Hellfire");
+                say("Which hilt material would you like to use?\n  1. Wooden\n  2. Sturdy\n  3. Ironwood\n  4. Enchanted Wood\n  5. Hellfire\n  ...\n  0. Cancel");
                 try
                 {
-                    reply2 = in.nextInt();
+                    reply3 = in.nextInt();
+                    break;
                 }
                 catch(InputMismatchException e)
                 {
@@ -908,6 +910,33 @@ public class Game
                 finally
                 {
                     in.nextLine();
+                }
+                if(reply3 == 0)
+                    throw new CancelledException();
+                else
+                    break;
+            }
+            while(true)
+            {
+                contents = "Crafting a ";
+                switch(reply2)
+                {
+                    case 1: contents+="Copper"; break;
+                    case 2: contents+="Tin"; break;
+                    case 3: contents+="Bronze"; break;
+                    case 4: contents+="Iron"; break;
+                    case 5: contents+="Steel"; break;
+                    case 6: contents+="Silver"; break;
+                    case 7: contents+="Gold"; break;
+                    case 8: contents+="Mythril"; break;
+                    case 9: contents+="Electrum"; break;
+                    case 10: contents+="Tarnished"; break;
+                    case 11: contents+="Gleamsteel"; break;
+                    case 12: contents+="Platinum"; break;
+                    case 13: contents+="Tungsten"; break;
+                    case 14: contents+="Duralite"; break;
+                    case 15: contents+="Adamantine"; break;
+                    default: continue;
                 }
             }
         }

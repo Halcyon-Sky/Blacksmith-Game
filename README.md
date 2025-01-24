@@ -16,6 +16,7 @@ The aim of the game is to make money by crafting and selling products. You start
 
 Be warned! It is possible to lose this game if you make poor economic decisions---or even just if you get unlucky, as the price of sold items has a bit of randomness to it.
 
+Currently, this game is extremely EXTREMELY broken in a large number of ways and completely unbalanced beyond any sane regard. However, it does show off the basic ideas and mechanics of the game well enough for now. I plan on rebuilding it at a later date and making an alpha build 2, which I'll release here, and that will be far less scuffed than this one.
 
 ## Credits:
 
@@ -32,5 +33,3 @@ Playtesting: Halcyon Sky
 ------------
 
 Programmed entirely in Java using BlueJ
-
-Notable features which I taught myself to make this: interfaces(don't think I used them for what you're supposed to), ArrayList, exception handling and throw statements

@@ -22,7 +22,7 @@ public class Game
             textSpeed = Math.abs(args[0]);
         }
         catch(Exception e)
-        {
+        {       
             textSpeed = 1000;
         }
         
@@ -31,7 +31,7 @@ public class Game
         {
             textSpeed = 0;
             u = 50;
-            gold = 9999;
+            gold = 9999; 
         }
         for(int i = 0; i < 15; i++)
         {
@@ -41,12 +41,13 @@ public class Game
         {
             inv2.add(i, new processedMaterial(u, i+1));
         }
-        for(int i = 0; i < 120; i++)
+        for(int i = 0; i < 128; i++)
         {
             inv3.add(i, new product(u, i+1));
         }
-        inv4.add(0, new equipment(0,1)); //This is currently filler just to populate the inv4 inventory: equipment as of 1.0.0 goes unused.
+        inv4.add(0, new equipment(0,1)); //This is currently filler just to populate the inv4 inventory: equipment as of right now goes unused.
         inv1.get(0).setAmount(u+5);
+        inv1.get(10).setAmount(u+5);
         int response = ask("Welcome to the Blacksmith Game! Would you like a tutorial?");
         int location = -1; //-1 for the tutorial, 0 for the storefront, 1 for the workshop, 2 for the market
         if(response == 1)
@@ -104,35 +105,15 @@ public class Game
                 response = ask("What would you like to do?", location);
                 if(response == 1)
                 {
-                    if(totalProducts(inv3) == 0 && totalEquipment(inv4) == 0) //TODO make the selling script
-                        say("It doesn't look like you have anything to sell.");
-                    else
-                    {
-                        try
-                        {
-                            sell();
-                        }
-                        catch(InventoryMismanagementException e)
-                        {
-                            say("You can't sell products that you don't have!");
-                        }
-                        catch(CancelledException e)
-                        {
-                            say("You change your mind and cancel sales.");
-                        }
-                    }
-                }
-                else if(response == 2)
-                {
                     say("Travelling to the marketplace...");
                     location = 2;
                 }
-                else if(response == 3)
+                else if(response == 2)
                 {
                     say("Travelling to the workshop...");
                     location = 1;
                 }
-                else if(response == 4)
+                else if(response == 3)
                 {
                     try
                     {
@@ -210,8 +191,8 @@ public class Game
                 }
                 else if(response == 4)
                 {
-                    say("Travelling to the storefront...");
-                    location = 0;
+                    say("Travelling to the market...");
+                    location = 2;
                 }
                 else if(response == 5)
                 {
@@ -286,8 +267,8 @@ public class Game
                 }
                 else if(response == 3)
                 {
-                    say("Travelling to the storefront...");
-                    location = 0;
+                    say("Travelling to the workshop...");
+                    location = 1;
                 }
                 else if(response == 4)
                 {
@@ -375,9 +356,9 @@ public class Game
         }
         int reply = 0;
         if(location == 0)
-            System.out.println(text + "\n  1. Put products out for sale\n  2. Go to the marketplace\n  3. Return to your workshop\n  4. Check your inventory\n  ...\n  0. Quit");
+            System.out.println(text + "\n  1. Go to the marketplace\n  2. Return to your workshop\n  3. Check your inventory\n  ...\n  0. Quit");
         else if(location == 1)
-            System.out.println(text + "\n  1. Smelt ore into ingots\n  2. Carve wood into hilts\n  3. Assemble finished weapons\n  4. Go to the storefront\n  5. Check your inventory\n  ...\n  0. Quit");
+            System.out.println(text + "\n  1. Smelt ore into ingots\n  2. Carve wood into hilts\n  3. Create and sell finished weapons\n  4. Go to the storefront\n  5. Check your inventory\n  ...\n  0. Quit");
         else if(location == 2)
             System.out.println(text + "\n  1. Purchase materials\n  2. Sell back materials\n  3. Return to the storefront\n  4. Check your inventory\n  ...\n  0. Quit");
         else
@@ -801,7 +782,7 @@ public class Game
                     }
                     else
                     {
-                        say("Successfully forged " + reply2 + " " + inv2.get(reply).getName() + "!");
+                        say("Successfully carved " + reply2 + " " + inv2.get(reply).getName() + "!");
                         inv1.get(recipeMaterial).spend(recipeCost * reply2);
                         inv2.get(reply).spend(-1 * reply2);
                         break;
@@ -810,6 +791,11 @@ public class Game
         }
     }
     
+    /**
+     * AT THIS TIME: Selling is a subfunction already initiated and run through in full as part of the craft function: this method is irrelevant as finished products all are automatically sold.
+     * This method header is being preserved for the sake of history and potential future updates, as at a previous time the user was intended to be able to store items in their products inventory to sell later.
+     * That functionality was compressed for time, like equipment, but may be brought back at a later date.
+     */
     static void sell() throws InventoryMismanagementException, CancelledException
     {
         //IDEA FOR THIS make a new Arraylist that takes the values from inv3 but only the ones with an amount > 0 to organise pages
@@ -819,6 +805,7 @@ public class Game
     {
         int reply, reply2, reply3, page = 0;//reply is used to pick what product to make, reply2 for what material to use, reply3 for what hilt to use
         String contents = "";
+        boolean correctmaterials = true;
         int requiredIngots, requiredHilt; //btwn 1= hilts, 2= greathilts, 3= hafts, and 0= none(shields)
         while(true)
         {
@@ -850,7 +837,6 @@ public class Game
                 case 8: requiredIngots = 8; requiredHilt = 0; break;
                 default: say("That's not a valid answer."); continue;
             }
-            break;
             
             while(true) //picking material
             {
@@ -894,13 +880,15 @@ public class Game
             }
             while(true)
             {
-                if(reply2 == 8) //breaks because shields no hilts
+                if(reply2 == 8) //breaks because shields have no hilts
+                {
+                    reply3 = 0;
                     break;
+                }
                 say("Which hilt material would you like to use?\n  1. Wooden\n  2. Sturdy\n  3. Ironwood\n  4. Enchanted Wood\n  5. Hellfire\n  ...\n  0. Cancel");
                 try
                 {
                     reply3 = in.nextInt();
-                    break;
                 }
                 catch(InputMismatchException e)
                 {
@@ -936,10 +924,56 @@ public class Game
                     case 13: contents+="Tungsten"; break;
                     case 14: contents+="Duralite"; break;
                     case 15: contents+="Adamantine"; break;
-                    default: continue;
+                    default: throw new CancelledException(); //if the user put something unrecognised for any of the switches beforehand it cancels here
                 }
+                switch(reply)
+                {
+                    case 1: contents+=" Dagger" ; break;
+                    case 2: contents+=" Shortsword"; break;
+                    case 3: contents+=" Longsword" ; break;
+                    case 4: contents+=" Greatsword"; break;
+                    case 5: contents+=" Axe"; break;
+                    case 6: contents+=" Spear"; break;
+                    case 7: contents+=" Halberd"; break;
+                    case 8: contents+=" Shield"; break;
+                    default: throw new CancelledException();
+                }
+                switch(reply3)
+                {
+                    case 0: contents+="."; break;
+                    case 1: contents+=" using Wooden for the grip."; break;
+                    case 2: contents+=" using Sturdy for the grip."; break;
+                    case 3: contents+=" using Ironwood for the grip."; break;
+                    case 4: contents+=" using Enchanted for the grip."; break;
+                    case 5: contents+=" using Hellfire for the grip."; break;
+                    default: throw new CancelledException();
+                }
+                say(contents);
+                if(ask("Is this okay?") == 1)
+                    break;
+                else
+                    throw new CancelledException();
             }
+            
+            //compute whether chosen weapon is able to be crafted and if so craft it
+            correctmaterials = (inv2.get(reply2-1).getAmount() >= requiredIngots);
+            correctmaterials = (inv2.get(14 + (reply3 * requiredHilt)).getAmount() >= 1);
+            if(!correctmaterials)
+                throw new InventoryMismanagementException();
+            say("Successfully crafted a(n) " + inv3.get(product.findWeapon(reply, reply2)).getName() + "!");
+            inv2.get(reply2-1).spend(requiredIngots);
+            inv2.get(14+(reply3*requiredHilt)).spend(1);
+            inv3.get(product.findWeapon(reply, reply2)).spend(-1);
+            inv3.get(product.findWeapon(reply, reply2)).setHilt(reply3);
+            //Eventually, the script will end here. However, the current build of Blacksmith Game has been compressed for time, and so that item we just got will automatically be sold just outside the loop.
+            
+            break;
         }
+        inv3.get(product.findWeapon(reply, reply2+1)).spend(1);
+        int salePrice = inv3.get(product.findWeapon(reply, reply2+1)).getPrice();
+        say("Your newly crafted weapon sold for " + salePrice + " on the market.");
+        gold+=salePrice;
+        return;
     }
     
     static void purchase() throws InventoryMismanagementException, CancelledException
@@ -1023,7 +1057,7 @@ public class Game
         int reply = 0;
         while(true)
         {
-            say("Which inventory would you like to check?\n  1. Raw Materials\n  2. Processed Materials\n  3. Products\n  ...\n  0. Quit");
+            say("Which inventory would you like to check?\n  1. Raw Materials\n  2. Processed Materials\n  ...\n  0. Quit");
             try
             {
                 reply = in.nextInt();
@@ -1040,7 +1074,7 @@ public class Game
             
             if(reply == 0)
                 throw new CancelledException();
-            else if(reply > 3 || reply < 0)
+            else if(reply > 2 || reply < 0)
             {
                 say("That's not a valid answer. Try again.");
                 continue;
@@ -1074,22 +1108,6 @@ public class Game
                     if(inv2.get(i).getAmount() == 0)
                         continue;
                     System.out.println("  " + inv2.get(i).getName() + " (" + inv2.get(i).getAmount() + ")");
-                }
-                return;
-            }
-            else if(reply == 3)
-            {
-                if(totalProducts(inv3) == 0)
-                {
-                    say("You have none of this item type!");
-                    return;
-                }
-                say("Products:");
-                for(int i = 0; i<inv3.size(); i++)
-                {
-                    if(inv3.get(i).getAmount() == 0)
-                        continue;
-                    System.out.println("  " + inv3.get(i).getName() + " (" + inv3.get(i).getAmount() + ")");
                 }
                 return;
             }

@@ -1,7 +1,7 @@
 public interface item
 {
-    public void setAmount();
-    public void getAmount();
-    public void spend();
-    public void getName();
+    public void setAmount(int num);
+    public int getAmount();
+    public void spend(int num);
+    public String getName();
 }

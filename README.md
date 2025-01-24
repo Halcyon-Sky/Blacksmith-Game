@@ -12,7 +12,7 @@ When launching the game, input an array with the text speed(in milliseconds) tha
 
 Answer the prompts with the number next to the selection of your choice. There is very little automatic correction so be exact, the game doesn't like it when you put in weird stuff.
 
-The aim of the game is to make money by crafting and selling products. You start with 50 gold and 5 copper ore, which is enough to craft your first copper dagger and sell it for more gold. You must carefully choose how to spend your money so that the products you make will sell for enough to keep your profits up.
+The aim of the game is to make money by crafting and selling products. You start with 50 gold, 5 wood, and 5 copper ore, which is enough to craft your first copper dagger and sell it for more gold. You must carefully choose how to spend your money so that the products you make will sell for enough to keep your profits up.
 
 Be warned! It is possible to lose this game if you make poor economic decisions---or even just if you get unlucky, as the price of sold items has a bit of randomness to it.
 

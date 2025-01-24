@@ -84,6 +84,17 @@ public class product implements item
         return (int)(Math.round(price));
     }
     
+    public static int findWeapon(int productType, int material)
+    {
+        int result = 0;
+        System.out.println("Result is " + result + ", productType is " + productType + ", and material is " + material);
+        result+=productType;
+        System.out.println("Result is " + result + ", productType is " + productType + ", and material is " + material);
+        result+=(8*(material-1));
+        System.out.println("Result is " + result + ", productType is " + productType + ", and material is " + material);
+        return result-1;
+    }
+    
     public String getName()
     {
         String result = "";
